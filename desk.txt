@@ -1,0 +1,7 @@
+bM8ikbmraw5ftELU
+bpronobbiswasinfo
+
+https://downloads.mongodb.com/compass/mongodb-compass-1.43.6-darwin-arm64.dmg
+
+
+mongodb+srv://bpronobbiswasinfo:a25vRfhjd1BdQoz1@cluster0.q1czh.mongodb.net/
