@@ -5,6 +5,6 @@
 @param({})
 *return
 */
-const DB = "mydatabase"
+const DB = "MYDATABASE"
 
 module.exports = {DB}
