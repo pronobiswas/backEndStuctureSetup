@@ -24,7 +24,6 @@ const UserSchema = new Schema({
         type:String,
         required : [true , "telephone is missing"],
         trim :true,
-        required: true,
         unique:true,
     },
     Address1:{
@@ -34,40 +33,44 @@ const UserSchema = new Schema({
     },
     Address2:{
         type:String,
-        required : [true , "address2 is missing"],
         trim :true,
     },
     City:{
         type:String,
-        required : [true , "City is missing"],
         trim :true,
     },
     PostCode:{
         type:String,
-        required : [true , "Post Code is missing"],
         trim :true,
         max:4
     },
     Devision:{
         type:String,
-        required : [true , "devission is missing"],
         trim :true,
     },
     District:{
         type:String,
-        required : [true , "District is missing"],
         trim :true,
     },
     Password:{
         type:String, 
-
         required : [true , "Passsword is missing"],
         trim :true,
     },
-    Password:{
+    OTP:{
         type:String,
-        required : true 
     },
+    Role:{
+        type:String,
+        enum : ['admin' , 'user' , 'marchent'],
+        default: 'user'
+    },
+    refreshToken:{
+        type:String
+    },
+    avatar:{
+        type:String
+    }
 }
 ,{timestamps:true});
 
