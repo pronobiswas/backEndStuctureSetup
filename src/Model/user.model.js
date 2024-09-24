@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const bcrypt = require("bcrypt");
 
 const UserSchema = new Schema(
   {
@@ -78,16 +77,6 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.pre("save", async function (next) {
-  if (this.isModified(this.Password)) {
-    this.Password = await bcrypt.hash(this.Password, 10);
-    next();
-  }
-  next()
-});
-UserSchema.methods.isValidatePassword = async (plainPassword)=>{
-  bcrypt.compare(plainPassword, this.Password)
-}
 
 const userModel = mongoose.model("user", UserSchema);
 module.exports = { userModel };

@@ -1,13 +1,14 @@
-/**
- * @param{{req.body}} req
- * @param {{}} res
- **/
 const { ApiError } = require("../Utils/ApiError.js");
 const { ApiResponse } = require("../Utils/ApiResponse.js");
 const { asyncHandeler } = require("../Utils/asyncHandeler.js");
 const { userModel } = require("../Model/user.model.js");
 const { EamilChecker, passwordChecker } = require("../Utils/Checker.js");
+const { bcryptPassword } = require("../Helper/Helper.js");
 
+/**
+ * @param{{req.body}} req
+ * @param {{}} res
+ **/
 const CreateUser = asyncHandeler(async (req, res) => {
   try {
     const {
@@ -22,73 +23,80 @@ const CreateUser = asyncHandeler(async (req, res) => {
       Devision,
       District,
       Password,
-    } = req.body;
+    } = req?.body;
 
     if (!FirstName) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `FirstName missing!!`));
+        .json(new ApiError(false, null, 400, `FirstName missing!!`));
     }
     if (!LastNane) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `LastNane missing!!`));
+        .json(new ApiError(false, null, 400, `LastNane missing!!`));
     }
     if (!EmailAddress || !EamilChecker(EmailAddress)) {
-      res
+      return res
         .status(404)
         .json(
-          new ApiError(false, null, 500, `EmailAddress missing or in valid!!`)
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
         );
     }
     if (!TelePhone) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `TelePhone missing!!`));
+        .json(new ApiError(false, null, 404, `TelePhone missing!!`));
     }
     if (!Address1) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `TelePhone missing!!`));
+        .json(new ApiError(false, null, 404, `TelePhone missing!!`));
     }
     if (!Address2) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `Address2 missing!!`));
+        .json(new ApiError(false, null, 404, `Address2 missing!!`));
     }
     if (!City) {
-      res.status(404).json(new ApiError(false, null, 500, `City missing!!`));
+      return res
+      .status(404)
+      .json(new ApiError(false, null, 500, `City missing!!`));
     }
     if (!PostCode) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `PostCode missing!!`));
+        .json(new ApiError(false, null, 404, `PostCode missing!!`));
     }
     if (!Devision) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `Devision missing!!`));
+        .json(new ApiError(false, null, 404, `Devision missing!!`));
     }
     if (!District) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `District missing!!`));
+        .json(new ApiError(false, null, 404, `District missing!!`));
     }
     if (!Password || !passwordChecker(Password)) {
-      res
+      return res
         .status(404)
-        .json(new ApiError(false, null, 500, `Password missing!!`));
+        .json(new ApiError(false, null, 404, `Password missing!!`));
     }
+
+    // =======check is user alredy exixt=========
 
     const ExistUser = await userModel.find({
       $or: [{ EmailAddress: EmailAddress }, { TelePhone: TelePhone }],
     });
     if (ExistUser) {
-      res.status(400).json(new ApiError(false, null, 500, `User alrady exist`));
+      res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
     }
 
+    // now make a  password encrypt
+    const hashPassword = await bcryptPassword(Password);
+
     // save data in database
-    const createUserOnDatabase = await new userModel({
+    const Users = await new userModel({
       FirstName,
       LastNane,
       EmailAddress,
@@ -99,23 +107,40 @@ const CreateUser = asyncHandeler(async (req, res) => {
       PostCode,
       Devision,
       District,
-      Password,
+      Password:hashPassword,
     }).save();
 
-    if (createUserOnDatabase) {
-      res
-        .status(200)
-        .json(
-          new ApiResponse(
-            true,
-            createUserOnDatabase,
-            200,
-            null,
-            "user create successfully"
-          )
-        );
-    }
-    res.end();
+    // =======create a accessToken=====
+    // const token = await userModel.generateAccesToken()
+    // console.log(token);
+
+
+
+    // if (Users) {
+    //    res
+    //     .status(200)
+    //     .json(
+    //       new ApiResponse(
+    //         true,
+    //         Users,
+    //         200,
+    //         null,
+    //         "user create successfully"
+    //       )
+    //     );
+    // }
+
+    return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        true,
+        Users,
+        200,
+        null,
+        "user create successfully"
+      )
+    )
   } catch (error) {
     console.log(`failed create  data on database : ${error}`);
   }
