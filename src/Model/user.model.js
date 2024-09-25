@@ -67,7 +67,7 @@ const UserSchema = new Schema(
       enum: ["admin", "user", "marchent"],
       default: "user",
     },
-    refreshToken: {
+    Token: {
       type: String,
     },
     avatar: {

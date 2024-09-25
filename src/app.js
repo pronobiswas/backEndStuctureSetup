@@ -3,12 +3,14 @@ const chalk = require('chalk')
 const app = express();
 const allRoutes = require('./Route/index.js');
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 
 // all middleware
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 app.use(allRoutes);
+app.use(cookieParser);
 
 
 app.get('/', function (req, res) {

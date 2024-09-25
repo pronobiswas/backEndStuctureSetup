@@ -3,7 +3,7 @@ const { ApiResponse } = require("../Utils/ApiResponse.js");
 const { asyncHandeler } = require("../Utils/asyncHandeler.js");
 const { userModel } = require("../Model/user.model.js");
 const { EamilChecker, passwordChecker } = require("../Utils/Checker.js");
-const { bcryptPassword } = require("../Helper/Helper.js");
+const { bcryptPassword, generateAccesToken } = require("../Helper/Helper.js");
 
 /**
  * @param{{req.body}} req
@@ -84,13 +84,14 @@ const CreateUser = asyncHandeler(async (req, res) => {
     }
 
     // =======check is user alredy exixt=========
-
     const ExistUser = await userModel.find({
       $or: [{ EmailAddress: EmailAddress }, { TelePhone: TelePhone }],
     });
     if (ExistUser) {
       res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
     }
+     // =======check is user alredy exixt=========
+
 
     // now make a  password encrypt
     const hashPassword = await bcryptPassword(Password);
@@ -111,36 +112,30 @@ const CreateUser = asyncHandeler(async (req, res) => {
     }).save();
 
     // =======create a accessToken=====
-    // const token = await userModel.generateAccesToken()
+    const accessToken = await generateAccesToken(EmailAddress,TelePhone)
+    console.log(accessToken);
+    
     // console.log(token);
 
 
 
-    // if (Users) {
-    //    res
-    //     .status(200)
-    //     .json(
-    //       new ApiResponse(
-    //         true,
-    //         Users,
-    //         200,
-    //         null,
-    //         "user create successfully"
-    //       )
-    //     );
-    // }
-
+    if (Users) {
+      const recentCreateUser = await userModel
+      .find({ $or: [{ FirstName }, { EmailAddress }] })
+      .select("-Password ");
     return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        true,
-        Users,
-        200,
-        null,
-        "user create successfully"
-      )
-    )
+      .status(200)
+      .json(
+        new ApiResponse(
+          true,
+          recentCreateUser,
+          200,
+          null,
+          "Registration  sucesfull"
+        )
+      );
+    }
+
   } catch (error) {
     console.log(`failed create  data on database : ${error}`);
   }
