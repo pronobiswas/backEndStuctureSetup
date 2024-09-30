@@ -9,6 +9,10 @@ const { bcryptPassword, generateAccesToken } = require("../Helper/Helper.js");
  * @param{{req.body}} req
  * @param {{}} res
  **/
+const options = {
+  httpOnly: true,
+  secure: true,
+};
 const CreateUser = asyncHandeler(async (req, res) => {
   try {
     const {
@@ -23,6 +27,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
       Devision,
       District,
       Password,
+      Token,
     } = req?.body;
 
     if (!FirstName) {
@@ -59,8 +64,8 @@ const CreateUser = asyncHandeler(async (req, res) => {
     }
     if (!City) {
       return res
-      .status(404)
-      .json(new ApiError(false, null, 500, `City missing!!`));
+        .status(404)
+        .json(new ApiError(false, null, 500, `City missing!!`));
     }
     if (!PostCode) {
       return res
@@ -90,8 +95,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
     if (ExistUser) {
       res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
     }
-     // =======check is user alredy exixt=========
-
+    // =======check is user alredy exixt=========
 
     // now make a  password encrypt
     const hashPassword = await bcryptPassword(Password);
@@ -108,34 +112,35 @@ const CreateUser = asyncHandeler(async (req, res) => {
       PostCode,
       Devision,
       District,
-      Password:hashPassword,
+      Password: hashPassword,
     }).save();
 
     // =======create a accessToken=====
-    const accessToken = await generateAccesToken(EmailAddress,TelePhone)
-    console.log(accessToken);
-    
-    // console.log(token);
+    const accessToken = await generateAccesToken(EmailAddress, TelePhone);
 
-
-
-    if (Users) {
-      const recentCreateUser = await userModel
-      .find({ $or: [{ FirstName }, { EmailAddress }] })
-      .select("-Password ");
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          true,
-          recentCreateUser,
-          200,
-          null,
-          "Registration  sucesfull"
-        )
+    if (Users || accessToken) {
+      // now set the tokrn on database
+      const setToken = await userModel.findOneAndUpdate(
+        { _id: Users._id },
+        {$set:{Token:accessToken}},
+        {new:true}
       );
+      const recentCreateUser = await userModel
+        .find({ $or: [{ TelePhone }, { EmailAddress }] })
+        .select("-Password -_id");
+      return res
+        .status(200)
+        .cookie("Token" , accessToken ,options)
+        .json(
+          new ApiResponse(
+            true,
+            recentCreateUser,
+            200,
+            null,
+            "Registration  sucesfull"
+          )
+        );
     }
-
   } catch (error) {
     console.log(`failed create  data on database : ${error}`);
   }

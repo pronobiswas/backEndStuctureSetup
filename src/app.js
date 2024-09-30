@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 app.use(allRoutes);
-app.use(cookieParser);
+app.use(cookieParser());
 
 
 app.get('/', function (req, res) {
