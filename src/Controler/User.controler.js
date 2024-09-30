@@ -129,12 +129,19 @@ const CreateUser = asyncHandeler(async (req, res) => {
     
 
     if (Users || accessToken) {
-      // now set the tokrn on database
+      // now set the token on database
       const setToken = await userModel.findOneAndUpdate(
         { _id: Users._id },
         { $set: { Token: accessToken } },
         { new: true }
       );
+       // now set the OTP on database
+       const setOTP = await userModel.findOneAndUpdate(
+        { _id: Users._id },
+        { $set: { OTP: otp } },
+        { new: true }
+      );
+
       const recentCreateUser = await userModel
         .find({ $or: [{ TelePhone }, { EmailAddress }] })
         .select("-Password -_id");
