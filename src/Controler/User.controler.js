@@ -118,7 +118,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(EmailAddress, TelePhone);
-    const mailInfo = await sendMail(EmailAddress)
+    const mailInfo = await sendMail(EmailAddress,FirstName)
     console.log(mailInfo);
     
 
