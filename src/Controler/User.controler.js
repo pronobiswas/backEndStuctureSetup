@@ -4,6 +4,7 @@ const { asyncHandeler } = require("../Utils/asyncHandeler.js");
 const { userModel } = require("../Model/user.model.js");
 const { EamilChecker, passwordChecker } = require("../Utils/Checker.js");
 const { bcryptPassword, generateAccesToken } = require("../Helper/Helper.js");
+const { sendMail } = require("../Utils/SendMail.js");
 
 /**
  * @param{{req.body}} req
@@ -117,6 +118,9 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(EmailAddress, TelePhone);
+    const mailInfo = await sendMail(EmailAddress)
+    console.log(mailInfo);
+    
 
     if (Users || accessToken) {
       // now set the tokrn on database
