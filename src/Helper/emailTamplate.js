@@ -1,4 +1,4 @@
-const MakeTemplate = (FirstName, opt="123456") => {
+const MakeTemplate = (FirstName, opt) => {
     return `<html lang="en">
   <head>
   

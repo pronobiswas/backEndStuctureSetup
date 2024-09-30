@@ -19,7 +19,8 @@
     "mongodb": "^6.8.0",
     "mongoose": "^8.6.0",
     "nodemailer": "^6.9.15",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "number-generator": "^4.0.6"
   },
   "devDependencies": {
     "chalk": "^4.0.0"

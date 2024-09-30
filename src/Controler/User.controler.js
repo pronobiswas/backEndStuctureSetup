@@ -5,6 +5,7 @@ const { userModel } = require("../Model/user.model.js");
 const { EamilChecker, passwordChecker } = require("../Utils/Checker.js");
 const { bcryptPassword, generateAccesToken } = require("../Helper/Helper.js");
 const { sendMail } = require("../Utils/SendMail.js");
+const { MakeOtp } = require("../Helper/OtpGenaretor.js");
 
 /**
  * @param{{req.body}} req
@@ -97,7 +98,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
       res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
     }
     // =======check is user alredy exixt=========
-
+    
     // now make a  password encrypt
     const hashPassword = await bcryptPassword(Password);
 
@@ -118,23 +119,29 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(EmailAddress, TelePhone);
-    const mailInfo = await sendMail(EmailAddress,FirstName)
+    // ===make otp====
+    const otp = await MakeOtp();
+    console.log(otp);
+    // ======dending email=====
+    const mailInfo = await sendMail(EmailAddress, FirstName,otp);
     console.log(mailInfo);
+
     
 
     if (Users || accessToken) {
       // now set the tokrn on database
       const setToken = await userModel.findOneAndUpdate(
         { _id: Users._id },
-        {$set:{Token:accessToken}},
-        {new:true}
+        { $set: { Token: accessToken } },
+        { new: true }
       );
       const recentCreateUser = await userModel
         .find({ $or: [{ TelePhone }, { EmailAddress }] })
         .select("-Password -_id");
+
       return res
         .status(200)
-        .cookie("Token" , accessToken ,options)
+        .cookie("Token", accessToken, options)
         .json(
           new ApiResponse(
             true,
@@ -145,6 +152,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
           )
         );
     }
+
   } catch (error) {
     console.log(`failed create  data on database : ${error}`);
   }
