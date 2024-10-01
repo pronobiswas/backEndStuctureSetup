@@ -98,7 +98,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
       res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
     }
     // =======check is user alredy exixt=========
-    
+
     // now make a  password encrypt
     const hashPassword = await bcryptPassword(Password);
 
@@ -123,10 +123,8 @@ const CreateUser = asyncHandeler(async (req, res) => {
     const otp = await MakeOtp();
     console.log(otp);
     // ======dending email=====
-    const mailInfo = await sendMail(EmailAddress, FirstName,otp);
-    console.log(mailInfo);
-
-    
+    const mailInfo = await sendMail(EmailAddress, FirstName, otp);
+    console.log(accessToken);
 
     if (Users || accessToken) {
       // now set the token on database
@@ -135,8 +133,8 @@ const CreateUser = asyncHandeler(async (req, res) => {
         { $set: { Token: accessToken } },
         { new: true }
       );
-       // now set the OTP on database
-       const setOTP = await userModel.findOneAndUpdate(
+      // now set the OTP on database
+      const setOTP = await userModel.findOneAndUpdate(
         { _id: Users._id },
         { $set: { OTP: otp } },
         { new: true }
@@ -144,11 +142,11 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
       const recentCreateUser = await userModel
         .find({ $or: [{ TelePhone }, { EmailAddress }] })
-        .select("-Password -_id");
+        .select("-Password");
 
       return res
         .status(200)
-        .cookie("Token", accessToken, options)
+        .cookie("accesToken", token, options)
         .json(
           new ApiResponse(
             true,
@@ -159,25 +157,63 @@ const CreateUser = asyncHandeler(async (req, res) => {
           )
         );
     }
-
   } catch (error) {
-    console.log(`failed create  data on database : ${error}`);
+    
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `Registration Controller Error:  ${error} !!`
+        )
+      );
   }
 });
 
-const loginCrontroller = async (req,res)=>{
-  return res
-  .status(200)
-  
-  .json(
-    new ApiResponse(
-      true,
-      {"user":"recentCreateUser"},
-      200,
-      null,
-      "login  sucesfull"
-    )
-  );
-}
+const loginCrontroller = async (req, res) => {
+  try {
+    // ==========validation=====
+    const { EmailAddress, Password } = req.body;
+    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
+        );
+    }
+    if (!Password || !passwordChecker(Password)) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `Password missing!!`));
+    }
+    // ==========validation=====
+    console.log(req.body);
+    console.log(res.Headers);
+    
+    
 
-module.exports = { CreateUser , loginCrontroller };
+    
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          true,
+          { user: "recentCreateUser" },
+          200,
+          null,
+          "login  sucesfull"
+        )
+      );
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(false, null, 400, `Login Controller Error:  ${error} !!`)
+      );
+  }
+};
+
+module.exports = { CreateUser, loginCrontroller };
