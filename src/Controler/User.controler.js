@@ -165,4 +165,19 @@ const CreateUser = asyncHandeler(async (req, res) => {
   }
 });
 
-module.exports = { CreateUser };
+const loginCrontroller = async (req,res)=>{
+  return res
+  .status(200)
+  
+  .json(
+    new ApiResponse(
+      true,
+      {"user":"recentCreateUser"},
+      200,
+      null,
+      "login  sucesfull"
+    )
+  );
+}
+
+module.exports = { CreateUser , loginCrontroller };
