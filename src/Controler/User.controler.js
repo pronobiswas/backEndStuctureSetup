@@ -19,6 +19,7 @@ const options = {
   httpOnly: true,
   secure: true,
 };
+// =======creaye user=========
 const CreateUser = asyncHandeler(async (req, res) => {
   try {
     const {
@@ -170,7 +171,6 @@ const CreateUser = asyncHandeler(async (req, res) => {
 });
 
 // ================login Controler==========
-
 const loginCrontroller = async (req, res) => {
   try {
     // ==========validation=====
@@ -233,4 +233,35 @@ const loginCrontroller = async (req, res) => {
   }
 };
 
-module.exports = { CreateUser, loginCrontroller };
+// =======get all regester user==========
+const getAllRegisterUser = async (req, res) => {
+  try {
+    const allUser = await userModel.find({}).select("-Password -OTP -Token");
+    if(allUser?.length) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            allUser,
+            200,
+            null,
+            "Get AllUsers sucessfully"
+          )
+        );
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `Forgot Password  Controller Error:  ${error} !!`
+        )
+      );
+  }
+};
+
+module.exports = { CreateUser, loginCrontroller,getAllRegisterUser };
