@@ -3,7 +3,11 @@ const { ApiResponse } = require("../Utils/ApiResponse.js");
 const { asyncHandeler } = require("../Utils/asyncHandeler.js");
 const { userModel } = require("../Model/user.model.js");
 const { EamilChecker, passwordChecker } = require("../Utils/Checker.js");
-const { bcryptPassword, generateAccesToken } = require("../Helper/Helper.js");
+const {
+  bcryptPassword,
+  decodeHashPassword,
+  generateAccesToken,
+} = require("../Helper/Helper.js");
 const { sendMail } = require("../Utils/SendMail.js");
 const { MakeOtp } = require("../Helper/OtpGenaretor.js");
 
@@ -94,8 +98,11 @@ const CreateUser = asyncHandeler(async (req, res) => {
     const ExistUser = await userModel.find({
       $or: [{ EmailAddress: EmailAddress }, { TelePhone: TelePhone }],
     });
-    if (ExistUser) {
-      res.status(404).json(new ApiError(false, null, 400, `User alrady exist`));
+
+    if (ExistUser?.length) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 400, `User alrady exist`));
     }
     // =======check is user alredy exixt=========
 
@@ -117,22 +124,14 @@ const CreateUser = asyncHandeler(async (req, res) => {
       Password: hashPassword,
     }).save();
 
-    // =======create a accessToken=====
-    const accessToken = await generateAccesToken(EmailAddress, TelePhone);
     // ===make otp====
     const otp = await MakeOtp();
     console.log(otp);
     // ======dending email=====
     const mailInfo = await sendMail(EmailAddress, FirstName, otp);
-    console.log(accessToken);
+    console.log(mailInfo);
 
-    if (Users || accessToken) {
-      // now set the token on database
-      const setToken = await userModel.findOneAndUpdate(
-        { _id: Users._id },
-        { $set: { Token: accessToken } },
-        { new: true }
-      );
+    if (Users || mailInfo) {
       // now set the OTP on database
       const setOTP = await userModel.findOneAndUpdate(
         { _id: Users._id },
@@ -146,7 +145,6 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
       return res
         .status(200)
-        .cookie("accesToken", token, options)
         .json(
           new ApiResponse(
             true,
@@ -158,7 +156,6 @@ const CreateUser = asyncHandeler(async (req, res) => {
         );
     }
   } catch (error) {
-    
     return res
       .status(404)
       .json(
@@ -171,6 +168,8 @@ const CreateUser = asyncHandeler(async (req, res) => {
       );
   }
 });
+
+// ================login Controler==========
 
 const loginCrontroller = async (req, res) => {
   try {
@@ -189,15 +188,33 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
     // ==========validation=====
-    console.log(req.body);
-    console.log(res.Headers);
-    
-    
 
-    
+    // =====find and match user creadential============
+    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    // =========password valigation======
+    const userPasswordIsValid = await decodeHashPassword(
+      Password,
+      findUser?.Password
+    );
+    // =======create a accessToken=====
+    const accessToken = await generateAccesToken(EmailAddress);
+    // ======check credential=======
+    if (findUser && userPasswordIsValid) {
+      // now set the token on database
+      const setToken = await userModel.findOneAndUpdate(
+        { _id: findUser._id },
+        { $set: { Token: accessToken } },
+        { new: true }
+      );
+    } else {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `creadential Error`));
+    }
 
     return res
       .status(200)
+      .cookie("Token", accessToken, options)
       .json(
         new ApiResponse(
           true,

@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// ===pasword encription=========
 const bcryptPassword = async (password) => {
     try {
         const hashPassword = await bcrypt.hash(password , 10);
@@ -8,6 +10,12 @@ const bcryptPassword = async (password) => {
         console.log(error);
     }
 }; 
+// =======Dycript password=======
+const decodeHashPassword = async (plainPassword, encryptedPassword) => {
+  const passwordResult = await bcrypt.compare(plainPassword, encryptedPassword);
+  return passwordResult;
+};
+// ========OTP generator====
 const generateAccesToken = async (EmailAddress, TelePhone) => {
     const AccessToken = await jwt.sign(
       {
@@ -20,4 +28,4 @@ const generateAccesToken = async (EmailAddress, TelePhone) => {
   
     return AccessToken;
   };
-module.exports = {bcryptPassword,generateAccesToken}
+module.exports = {bcryptPassword,decodeHashPassword,generateAccesToken}
