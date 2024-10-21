@@ -212,18 +212,21 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `creadential Error`));
     }
 
-    return res
-      .status(200)
-      .cookie("Token", accessToken, options)
-      .json(
-        new ApiResponse(
-          true,
-          { user: "recentCreateUser" },
-          200,
-          null,
-          "login  sucesfull"
+    return (
+      res
+        .status(200)
+        // ==set token in cokies===
+        .cookie("Token", accessToken, options)
+        .json(
+          new ApiResponse(
+            true,
+            { user: "recentCreateUser" },
+            200,
+            null,
+            "login  sucesfull"
+          )
         )
-      );
+    );
   } catch (error) {
     return res
       .status(404)
@@ -232,22 +235,75 @@ const loginCrontroller = async (req, res) => {
       );
   }
 };
+// =====otp match Controler========
+const otpMatchControler = async (req, res) => {
+  console.log("otp controler active");
+  try {
+    const { EmailAddress, OTP } = req.body;
+    // ===email vaidation=======
+    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
+        );
+    }
+    // ==========OTP vaidation=========
+    if (!OTP) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `OTP missing or in valid!!`));
+    }
+    // =====find and match user creadential============
+    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });    
+    if (!findUser) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `User doesnot Exist`));
+    }
+    if (findUser.OTP == OTP) {
+      findUser.OTP = null;
+      await findUser.save()
+      return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          true,
+          null,
+          200,
+          null,
+          "OTP matching sucesfull"
+        )
+      );
+    } else {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `OTP Doesn't match!!`));
+    }
+    // ====match OTP========
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `otpMatchControler Controller Error:  ${error} !!`
+        )
+      );
+  }
+};
 
 // =======get all regester user==========
 const getAllRegisterUser = async (req, res) => {
   try {
     const allUser = await userModel.find({}).select("-Password -OTP -Token");
-    if(allUser?.length) {
+    if (allUser?.length) {
       return res
         .status(200)
         .json(
-          new ApiResponse(
-            true,
-            allUser,
-            200,
-            null,
-            "Get AllUsers sucessfully"
-          )
+          new ApiResponse(true, allUser, 200, null, "Get AllUsers sucessfully")
         );
     }
   } catch (error) {
@@ -258,10 +314,15 @@ const getAllRegisterUser = async (req, res) => {
           false,
           null,
           400,
-          `Forgot Password  Controller Error:  ${error} !!`
+          `getAllRegisterUser Controller Error:  ${error} !!`
         )
       );
   }
 };
 
-module.exports = { CreateUser, loginCrontroller,getAllRegisterUser };
+module.exports = {
+  CreateUser,
+  loginCrontroller,
+  otpMatchControler,
+  getAllRegisterUser,
+};
