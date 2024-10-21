@@ -235,6 +235,7 @@ const loginCrontroller = async (req, res) => {
       );
   }
 };
+
 // =====otp match Controler========
 const otpMatchControler = async (req, res) => {
   console.log("otp controler active");
@@ -255,7 +256,7 @@ const otpMatchControler = async (req, res) => {
         .json(new ApiError(false, null, 404, `OTP missing or in valid!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });    
+    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
     if (!findUser) {
       return res
         .status(404)
@@ -263,24 +264,59 @@ const otpMatchControler = async (req, res) => {
     }
     if (findUser.OTP == OTP) {
       findUser.OTP = null;
-      await findUser.save()
+      await findUser.save();
       return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          true,
-          null,
-          200,
-          null,
-          "OTP matching sucesfull"
-        )
-      );
+        .status(200)
+        .json(new ApiResponse(true, null, 200, null, "OTP matching sucesfull"));
     } else {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `OTP Doesn't match!!`));
     }
     // ====match OTP========
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `otpMatchControler Controller Error:  ${error} !!`
+        )
+      );
+  }
+};
+
+// =======forgot password controler===========
+const forgotPasswordControler = async (req, res) => {
+  console.log("from forgot password");
+  try {
+    const { EmailAddress } = req.body;
+    // ===email vaidation=======
+    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
+        );
+    }
+    // =====find and match user creadential============
+    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    // ===make otp====
+    const otp = await MakeOtp();
+    console.log(otp);
+    // =======sent mail========
+    await sendMail(EmailAddress, findUser.FirstName, otp);
+    // ======set and save otp====
+    findUser.OTP = otp;
+    await findUser.save;
+    // ======send response=======
+    console.log(findUser);
+    return res
+    .status(200)
+    .json(new ApiResponse(true, null, 200, null, "Forgot sucesfull && check your email"));
+
   } catch (error) {
     return res
       .status(404)
@@ -324,5 +360,6 @@ module.exports = {
   CreateUser,
   loginCrontroller,
   otpMatchControler,
+  forgotPasswordControler,
   getAllRegisterUser,
 };
