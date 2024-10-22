@@ -105,7 +105,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
         .status(404)
         .json(new ApiError(false, null, 400, `User alrady exist`));
     }
-    // =======check is user alredy exixt=========
+    // =======password encrypeted=========
 
     // now make a  password encrypt
     const hashPassword = await bcryptPassword(Password);
@@ -305,7 +305,6 @@ const forgotPasswordControler = async (req, res) => {
     const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
     // ===make otp====
     const otp = await MakeOtp();
-    console.log(otp);
     // =======sent mail========
     await sendMail(EmailAddress, findUser.FirstName, otp);
     // ======set and save otp====
@@ -314,9 +313,16 @@ const forgotPasswordControler = async (req, res) => {
     // ======send response=======
     console.log(findUser);
     return res
-    .status(200)
-    .json(new ApiResponse(true, null, 200, null, "Forgot sucesfull && check your email"));
-
+      .status(200)
+      .json(
+        new ApiResponse(
+          true,
+          null,
+          200,
+          null,
+          "Forgot sucesfull && check your email"
+        )
+      );
   } catch (error) {
     return res
       .status(404)
@@ -331,6 +337,68 @@ const forgotPasswordControler = async (req, res) => {
   }
 };
 
+// =======reset password controler===========
+const restPasswordControler = async (req, res) => {
+  console.log("from rest password controler");
+  try {
+    const { EmailAddress, Password, OTP } = req.body;
+    // =====email and password validation========
+    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
+        );
+    }
+    if (!Password || !passwordChecker(Password) || !OTP) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `Password missing!!`));
+    }
+    // =====find and match user creadential============
+    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    console.log(findUser);
+    
+    if(!findUser){
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `user not exist!!`)
+        );
+    }
+    if(findUser.OTP == OTP){
+      // =======password encrypeted=========
+      const hashPassword = await bcryptPassword(Password);
+      findUser.Password = hashPassword;
+      await findUser.save();
+      // ======sent response=======
+      return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          true,
+          null,
+          200,
+          null,
+          "Forgot sucesfull && check your email"
+        )
+      );
+    }
+    
+
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `restPasswordControler Controller Error:  ${error} !!`
+        )
+      );
+  }
+};
 // =======get all regester user==========
 const getAllRegisterUser = async (req, res) => {
   try {
@@ -361,5 +429,6 @@ module.exports = {
   loginCrontroller,
   otpMatchControler,
   forgotPasswordControler,
+  restPasswordControler,
   getAllRegisterUser,
 };
