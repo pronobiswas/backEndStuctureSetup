@@ -173,8 +173,8 @@ const CreateUser = asyncHandeler(async (req, res) => {
 // ================login Controler==========
 const loginCrontroller = async (req, res) => {
   try {
-    // ==========validation=====
     const { EmailAddress, Password } = req.body;
+    // ==========validation=====
     if (!EmailAddress || !EamilChecker(EmailAddress)) {
       return res
         .status(404)
@@ -187,8 +187,6 @@ const loginCrontroller = async (req, res) => {
         .status(404)
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
-    // ==========validation=====
-
     // =====find and match user creadential============
     const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
     // =========password valigation======
@@ -358,34 +356,30 @@ const restPasswordControler = async (req, res) => {
     // =====find and match user creadential============
     const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
     console.log(findUser);
-    
-    if(!findUser){
+
+    if (!findUser) {
       return res
         .status(404)
-        .json(
-          new ApiError(false, null, 404, `user not exist!!`)
-        );
+        .json(new ApiError(false, null, 404, `user not exist!!`));
     }
-    if(findUser.OTP == OTP){
+    if (findUser.OTP == OTP) {
       // =======password encrypeted=========
       const hashPassword = await bcryptPassword(Password);
       findUser.Password = hashPassword;
       await findUser.save();
       // ======sent response=======
       return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          true,
-          null,
-          200,
-          null,
-          "Forgot sucesfull && check your email"
-        )
-      );
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            null,
+            200,
+            null,
+            "Forgot sucesfull && check your email"
+          )
+        );
     }
-    
-
   } catch (error) {
     return res
       .status(404)
@@ -395,6 +389,62 @@ const restPasswordControler = async (req, res) => {
           null,
           400,
           `restPasswordControler Controller Error:  ${error} !!`
+        )
+      );
+  }
+};
+
+// ==========change Role==========
+const roleChangeControler = async (req, res) => {
+  try {
+    console.log("from changeControler");
+    const { EmailAddress, TelePhone, role } = req.body;
+    // =====email validation========
+    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
+        );
+    }
+    // ========telephone validation==========
+    if (!TelePhone || TelePhone.length < 9) {
+      return res
+        .status(404)
+        .json(
+          new ApiError(false, null, 404, `PhoneNumber missing or in valid!!`)
+        );
+    }
+    // =====find and match user creadential============
+    const findUser = await userModel.findOne({
+      $or: [{ EmailAddress: EmailAddress }, { TelePhone: TelePhone }],
+    });
+    // ===========change Role=========
+    if (findUser.Role === "user") {
+      findUser.Role = role;
+      await findUser.save();
+      // ======sent response=======
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(true, null, 200, null, "Role update  successfully")
+        );
+    } else {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(true, null, 200, null, "You are alredy merchent")
+        );
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `roleChangeControler Error:  ${error} !!`
         )
       );
   }
@@ -430,5 +480,6 @@ module.exports = {
   otpMatchControler,
   forgotPasswordControler,
   restPasswordControler,
+  roleChangeControler,
   getAllRegisterUser,
 };

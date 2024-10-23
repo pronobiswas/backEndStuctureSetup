@@ -1,9 +1,10 @@
 const { ApiError } = require("../Utils/ApiError");
+const jwt = require('jsonwebtoken');
 
 const authGuard = async (req, res, next) => {
   try {
-    const token = res.token;
-    console.log(token);
+    const { Cookie, authorization } = req.headers;
+    console.log(Cookie);
     console.log("hello");
     
     
@@ -13,3 +14,4 @@ const authGuard = async (req, res, next) => {
     console.log(`This is authGaurd Error : ${error}`);
   }
 };
+module.exports = { authGuard }
