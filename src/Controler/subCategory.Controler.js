@@ -71,7 +71,7 @@ const createSubCategoryControler = async (req, res) => {
       );
   }
 };
-// =======getAllr SubCategory======
+// =======getAll SubCategory======
 const getAllSubCategoryControler = async (req, res) => {
   console.log("getAllSubCategoryControler subcategory");
 
@@ -101,6 +101,28 @@ const getAllSubCategoryControler = async (req, res) => {
       );
   }
 };
+// ======get A single Category======
+const getSingleCategoryControler = async (req,res)=>{
+    console.log("single category controler");
+    try {
+        const {id} = req.params;
+        const singleSubcategory =await subCategoryModel.findById(id);
+        if(singleSubcategory){
+            return res.status(200).json(new ApiResponse(true,singleSubcategory,200,'single subcategory retrive successfully'))
+        }else{return res.status(400).json(new ApiError(false,singleSubcategory,400,'single subcategory not found'))}
+    } catch (error) {
+        return res
+      .status(501)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `getSingleCategoryControler Error:  ${error} !!`
+        )
+      );
+    }
+}
 // =======delete SubCategory======
 const deleteSubCategoryControler = async (req, res) => {
   console.log("delete subcategory");
@@ -162,5 +184,6 @@ const deleteSubCategoryControler = async (req, res) => {
 module.exports = {
   createSubCategoryControler,
   getAllSubCategoryControler,
+  getSingleCategoryControler,
   deleteSubCategoryControler,
 };
