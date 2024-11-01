@@ -12,4 +12,9 @@ const passwordChecker = (password = "Mern@2305") => {
   return testResult;
 };
 
-module.exports = { EamilChecker, passwordChecker };
+const bdNumberChecker = (TelePhone) => {
+  const bdPhoneNumberRegex = /^(?:\+8801[3-9]\d{8}|01[3-9]\d{8})$/;
+  return bdPhoneNumberRegex.test(phoneNumber)
+}
+
+module.exports = { EamilChecker, passwordChecker ,bdNumberChecker};
