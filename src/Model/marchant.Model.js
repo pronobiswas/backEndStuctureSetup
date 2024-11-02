@@ -41,4 +41,4 @@ const marchantSchema = new Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model('marchant', marchantSchema);
+module.exports = mongoose.model('store', marchantSchema);
