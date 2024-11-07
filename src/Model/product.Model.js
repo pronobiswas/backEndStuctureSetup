@@ -49,10 +49,9 @@ const productSchema = new Schema(
       ref: "marchant",
       required: true,
     },
-    image: {
+    image: [{
       type: String,
-      required: true,
-    },
+    }],
   },
   {
     timestamps: true,
