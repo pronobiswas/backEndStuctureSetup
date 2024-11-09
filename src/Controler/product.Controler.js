@@ -1,6 +1,9 @@
 const { ApiError } = require("../Utils/ApiError");
 const { ApiResponse } = require("../Utils/ApiResponse.js");
-const { uploaadCloudinary } = require("../Utils/cloudinary.js");
+const {
+  uploaadCloudinary,
+  deleteCloudImage,
+} = require("../Utils/cloudinary.js");
 const productModel = require("../Model/product.Model.js");
 const NodeCache = require("node-cache");
 const myCache = new NodeCache();
@@ -85,7 +88,7 @@ const getAllProductControler = async (req, res) => {
       const allproducts = await productModel
         .find({})
         .populate(["category", "subcategory", "owner"]);
-        
+
       // ====set cache data====
       myCache.set("allProduct", JSON.stringify(allproducts));
       // ===return a response===
@@ -126,4 +129,69 @@ const getAllProductControler = async (req, res) => {
       );
   }
 };
-module.exports = { postProductControler, getAllProductControler };
+
+// ======update Products====
+const updatePrductControler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const image = req.files?.image;
+    let updateProductOBJ = {};
+    // =========find the object=====
+    const productTobeUpdate = await productModel.findById(id);
+    
+    
+    if (image) {
+      // =====deleteImage From cloudnari======
+      await deleteCloudImage(productTobeUpdate?.image);
+      console.log(productTobeUpdate?.image);
+      // =====upload new image in cloudinary======
+      const imageUrl = await uploaadCloudinary(image);
+
+      updateProductOBJ = { ...req.body, image: imageUrl };
+    } else {
+      updateProductOBJ = { ...req.body };
+    }
+
+    // =====updateANDreturn the product======
+    const updatedProduct = await productModel.findOneAndUpdate(
+      { _id: id },
+      { ...updateProductOBJ },
+      { new: true }
+    );
+
+    if (updatedProduct) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            updatedProduct,
+            200,
+            `product update succfullly !!`
+          )
+        );
+    } else {
+      return res
+        .status(501)
+        .json(new ApiError(false, null, 501, `product update failed !!`));
+    }
+
+    // =====throw update product Error=====
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new ApiError(
+          false,
+          null,
+          501,
+          `updatePrductControler Error:  ${error} !!`
+        )
+      );
+  }
+};
+module.exports = {
+  postProductControler,
+  getAllProductControler,
+  updatePrductControler,
+};
