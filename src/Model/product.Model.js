@@ -46,12 +46,14 @@ const productSchema = new Schema(
     },
     storeid: {
       type: Schema.Types.ObjectId,
-      ref: "marchant",
+      ref: "store",
       required: true,
     },
-    image: [{
-      type: String,
-    }],
+    image: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,

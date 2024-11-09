@@ -138,8 +138,7 @@ const updatePrductControler = async (req, res) => {
     let updateProductOBJ = {};
     // =========find the object=====
     const productTobeUpdate = await productModel.findById(id);
-    
-    
+
     if (image) {
       // =====deleteImage From cloudnari======
       await deleteCloudImage(productTobeUpdate?.image);
@@ -190,8 +189,39 @@ const updatePrductControler = async (req, res) => {
       );
   }
 };
+
+// ======get a singleProduct=========
+const singleProductControler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const singleProduct = await productModel
+      .findById(id)
+      .populate(["category", "subcategory", "owner", "storeid"]);
+    if (singleProduct) {
+      return res
+        .status(200)
+        .json(new ApiResponse(true, singleProduct, 200, `singleProduct`));
+    } else {
+      return res
+        .status(501)
+        .json(new ApiError(false, null, 501, `Product not found !!`));
+    }
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new ApiError(
+          false,
+          null,
+          501,
+          `singleProductControler Error:  ${error} !!`
+        )
+      );
+  }
+};
 module.exports = {
   postProductControler,
   getAllProductControler,
   updatePrductControler,
+  singleProductControler,
 };
