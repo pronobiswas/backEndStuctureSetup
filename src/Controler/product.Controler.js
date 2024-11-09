@@ -2,7 +2,10 @@ const { ApiError } = require("../Utils/ApiError");
 const { ApiResponse } = require("../Utils/ApiResponse.js");
 const { uploaadCloudinary } = require("../Utils/cloudinary.js");
 const productModel = require("../Model/product.Model.js");
+const NodeCache = require("node-cache");
+const myCache = new NodeCache();
 
+// =====create a product======
 const postProductControler = async (req, res) => {
   try {
     // =========validation====
@@ -19,7 +22,7 @@ const postProductControler = async (req, res) => {
     }
     // ======image validation=====
     const image = req.files?.image;
-    
+
     if (!image) {
       return res
         .status(404)
@@ -42,12 +45,11 @@ const postProductControler = async (req, res) => {
 
     // =======upload image========
     const imageInfo = await uploaadCloudinary(image);
-    
+
     // ========save in mongodb=======
     const SaveProduct = await new productModel({
       ...req.body,
       image: [...imageInfo],
-      
     }).save();
     console.log(SaveProduct);
 
@@ -72,4 +74,56 @@ const postProductControler = async (req, res) => {
   }
 };
 
-module.exports = { postProductControler };
+// =======get all product=======
+const getAllProductControler = async (req, res) => {
+  try {
+    // =======trying get data from cache=====
+    let value = myCache.get("allProduct");
+
+    if (value === undefined) {
+      // ===find data from database===
+      const allproducts = await productModel
+        .find({})
+        .populate(["category", "subcategory", "owner"]);
+        
+      // ====set cache data====
+      myCache.set("allProduct", JSON.stringify(allproducts));
+      // ===return a response===
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            allproducts,
+            200,
+            `getAllProductControler successfully !!`
+          )
+        );
+    } else {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            JSON.parse(value),
+            200,
+            `getAllProductControler successfully !!`
+          )
+        );
+    }
+
+    // ======trow an Error===
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new ApiError(
+          false,
+          null,
+          501,
+          `getAllProductControler Error:  ${error} !!`
+        )
+      );
+  }
+};
+module.exports = { postProductControler, getAllProductControler };
