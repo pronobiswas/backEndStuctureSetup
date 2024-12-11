@@ -22,12 +22,12 @@ const productSchema = new Schema(
       ref: "subcategory",
     },
     price: {
-      type: String,
+      type: Number,
       trim: true,
       required: [true, "Product price is Required"],
     },
-    discountPrice: {
-      type: String,
+    discountPercent: {
+      type: Number,
       trim: true,
     },
     rating: {

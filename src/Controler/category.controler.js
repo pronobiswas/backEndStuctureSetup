@@ -33,7 +33,7 @@ const createCategoryControler = async (req, res) => {
       return res
         .status(200)
         .json(
-          new ApiResponse(false, null, 200, `category create successfully!!`)
+          new ApiResponse(true, null, 200, `category create successfully!!`)
         );
     }
   } catch (error) {
