@@ -74,6 +74,39 @@ const GetallBannerImageControler = async (req, res) => {
 // ======delete Banner image controler=========
 const deleteBannerImageControler = async (req, res) => {
   try {
+    const {id} = req.params;
+    // ====find item ======
+    const seacrhItem = await bannerModel.findById(id);
+    if(!seacrhItem){
+      return res
+      .status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          404,
+          `banner item not found`
+        )
+      );
+    }
+    // ====delete image from cloudinary====
+    const deletedImage = await deleteCloudImage([seacrhItem?.image]);
+    // ====delete data from database=======
+    const deleteItem = await bannerModel.findOneAndDelete({_id:id});
+    if(deleteItem){
+      res.status(200).json(
+        new ApiResponse(
+          true,
+          deleteItem,
+          200,
+          null,
+          "delete successfully"
+        )
+      )
+    }
+    
+
+    
   } catch (error) {
     return res
       .status(400)
@@ -166,5 +199,6 @@ const updateBannnerControler = async (req, res) => {
 module.exports = {
   CreateBannerControl,
   GetallBannerImageControler,
+  deleteBannerImageControler,
   updateBannnerControler,
 };
