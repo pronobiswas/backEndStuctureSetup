@@ -1,6 +1,9 @@
 const { ApiError } = require("../Utils/ApiError");
 const { ApiResponse } = require("../Utils/ApiResponse.js");
-const { uploaadCloudinary } = require("../Utils/cloudinary.js");
+const {
+  uploaadCloudinary,
+  deleteCloudImage,
+} = require("../Utils/cloudinary.js");
 const bannerModel = require("../Model/bannerModel.js");
 // ======craete bannner Controler=========
 const CreateBannerControl = async (req, res) => {
@@ -49,7 +52,15 @@ const GetallBannerImageControler = async (req, res) => {
     if (allbannerImage) {
       return res
         .status(200)
-        .json(new ApiResponse(true, allbannerImage, 200, null,"successfully get  allbannerImage"));
+        .json(
+          new ApiResponse(
+            true,
+            allbannerImage,
+            200,
+            null,
+            "successfully get  allbannerImage"
+          )
+        );
     }
   } catch (error) {
     return res
@@ -60,5 +71,100 @@ const GetallBannerImageControler = async (req, res) => {
   }
 };
 
+// ======delete Banner image controler=========
+const deleteBannerImageControler = async (req, res) => {
+  try {
+  } catch (error) {
+    return res
+      .status(400)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `deleteBannerImageControler Error:  ${error} !!`
+        )
+      );
+  }
+};
+
+// ========update benner Controler=======
+const updateBannnerControler = async (req, res) => {
+  try {
+    // ====distructing data from request=======
+    const { id } = req.params;
+    const { image } = req.files?.image;
+    console.log(req.files?.image);
+
+    // ======validation=====
+    // if (!image) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, "Image not found"));
+    // }
+    // ======Search item====
+    const seacrhItem = await bannerModel.findById(id);
+
+    // -----if search item notfound-----
+    if (!seacrhItem) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, "Item not found"));
+    }
+    if (seacrhItem) {
+      // ====delete image from cloudinary====
+      const deletedImage = await deleteCloudImage([seacrhItem?.image]);
+      // ===if delete seccessfully===
+      if (deletedImage) {
+        // =====upload new image on cloudnary=======
+        const uploadUrl = await uploaadCloudinary(req.files?.image);
+        // ====update banner===
+        if(uploadUrl){
+          const updateBanner = await bannerModel.findOneAndUpdate(
+            {_id:id},
+            {...req.body, image:uploadUrl[0]},
+            {new:true}
+          );
+          if(updateBanner){
+            return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            updateBanner,
+            200,
+            null,
+            "successfully update banner"
+          )
+        );
+          }
+        }
+        
+      } else {
+        return res
+          .status(404)
+          .json(new ApiError(false, null, 404, "Image couls not deleted"));
+      }
+    }
+
+    // ======throw global error======
+  } catch (error) {
+    return res
+      .status(400)
+      .json(
+        new ApiError(
+          false,
+          null,
+          400,
+          `updateBannnerControler Error:  ${error} !!`
+        )
+      );
+  }
+};
+
 // =======exports========
-module.exports = { CreateBannerControl, GetallBannerImageControler };
+module.exports = {
+  CreateBannerControl,
+  GetallBannerImageControler,
+  updateBannnerControler,
+};

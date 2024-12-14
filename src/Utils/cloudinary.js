@@ -36,26 +36,22 @@ const uploaadCloudinary = async (
 };
 
 const deleteCloudImage = async (imagePth) => {
-  console.log(imagePth);
-  
   try {
+    let deltedItem = [];
     for (singleImage of imagePth) {
-      const allImageUrl = singleImage.split('/');
-      console.log(allImageUrl);
-      
-      const cloudImagename =(allImageUrl[allImageUrl?.length -1].split('.')[0]);
-      console.log(cloudImagename);
-      
-       await cloudinary.api
-            .delete_resources(cloudImagename ||'dpkks1jq07ehurbjhm6u',
-                { type: 'upload', resource_type: 'image' })
-      
+      const allImageUrl = singleImage.split("/");
+      const cloudImagename = allImageUrl[allImageUrl?.length - 1].split(".")[0];
+
+      const deleteItem = await cloudinary.api.delete_resources(
+        cloudImagename || "dpkks1jq07ehurbjhm6u",
+        { type: "upload", resource_type: "image" }
+      );
+      deltedItem.push(deleteItem);
     }
-    console.log(deleteItem);
-    
+    return deltedItem
   } catch (error) {
-    console.log("this is from cloudnary delete image" , error);
+    console.log("this is from cloudnary delete image", error);
   }
 };
 
-module.exports = { uploaadCloudinary ,deleteCloudImage };
+module.exports = { uploaadCloudinary, deleteCloudImage };
