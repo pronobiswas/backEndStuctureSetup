@@ -5,6 +5,7 @@ const {
   deleteCloudImage,
 } = require("../Utils/cloudinary.js");
 const productModel = require("../Model/product.Model.js");
+const categoryModel = require("../Model/category.model.js");
 const NodeCache = require("node-cache");
 const myCache = new NodeCache();
 
@@ -57,6 +58,14 @@ const postProductControler = async (req, res) => {
     console.log(SaveProduct);
 
     if (SaveProduct) {
+      // =====delete caches data====
+      const value =myCache.del('allproducts');
+      // ======add product to category=========
+      const category = await categoryModel.findById(req?.body?.category);
+      category.product.push(SaveProduct._id);
+      await category.save();
+
+      
       return res
         .status(200)
         .json(
@@ -81,7 +90,7 @@ const postProductControler = async (req, res) => {
 const getAllProductControler = async (req, res) => {
   try {
     // =======trying get data from cache=====
-    let value = myCache.get("allProduct");
+    let value = myCache.get("allproducts");
 
     if (value === undefined) {
       // ===find data from database===
@@ -90,7 +99,7 @@ const getAllProductControler = async (req, res) => {
         .populate(["category", "subcategory", "owner"]);
 
       // ====set cache data====
-      myCache.set("allProduct", JSON.stringify(allproducts));
+      myCache.set("allproducts", JSON.stringify(allproducts));
       // ===return a response===
       return res
         .status(200)
@@ -194,6 +203,8 @@ const updatePrductControler = async (req, res) => {
 const singleProductControler = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("from backend",id);
+    
     const singleProduct = await productModel
       .findById(id)
       .populate(["category", "subcategory", "owner", "storeid"]);

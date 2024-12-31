@@ -23,73 +23,74 @@ const options = {
 const CreateUser = asyncHandeler(async (req, res) => {
   try {
     const {
-      FirstName,
-      LastNane,
-      EmailAddress,
-      TelePhone,
-      Address1,
-      Address2,
-      City,
-      PostCode,
-      Devision,
-      District,
-      Password,
-      Token,
+      firstName,
+      lastName,
+      emailAddress,
+      telePhone,
+      address1,
+      address2,
+      city,
+      postCode,
+      devision,
+      district,
+      password,
+      token,
     } = req?.body;
 
-    if (!FirstName) {
+    if (!firstName) {
       return res
         .status(404)
         .json(new ApiError(false, null, 400, `FirstName missing!!`));
     }
-    if (!LastNane) {
+    if (!lastName) {
       return res
         .status(404)
         .json(new ApiError(false, null, 400, `LastNane missing!!`));
     }
-    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+    if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
         .status(404)
         .json(
           new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
         );
     }
-    if (!TelePhone) {
+    if (!telePhone) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `TelePhone missing!!`));
     }
-    if (!Address1) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 404, `TelePhone missing!!`));
-    }
-    if (!Address2) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 404, `Address2 missing!!`));
-    }
-    if (!City) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 500, `City missing!!`));
-    }
-    if (!PostCode) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 404, `PostCode missing!!`));
-    }
-    if (!Devision) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 404, `Devision missing!!`));
-    }
-    if (!District) {
-      return res
-        .status(404)
-        .json(new ApiError(false, null, 404, `District missing!!`));
-    }
-    if (!Password || !passwordChecker(Password)) {
+    // if (!Address1) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, `TelePhone missing!!`));
+    // }
+    // if (!Address2) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, `Address2 missing!!`));
+    // }
+    // if (!City) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 500, `City missing!!`));
+    // }
+    // if (!PostCode) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, `PostCode missing!!`));
+    // }
+
+    // if (!Devision) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, `Devision missing!!`));
+    // }
+    // if (!District) {
+    //   return res
+    //     .status(404)
+    //     .json(new ApiError(false, null, 404, `District missing!!`));
+    // }
+    if (!password || !passwordChecker(password)) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `Password missing!!`));
@@ -97,7 +98,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
 
     // =======check is user alredy exixt=========
     const ExistUser = await userModel.find({
-      $or: [{ EmailAddress: EmailAddress }, { TelePhone: TelePhone }],
+      $or: [{ emailAddress: emailAddress }, { telePhone: telePhone }],
     });
 
     if (ExistUser?.length) {
@@ -108,28 +109,28 @@ const CreateUser = asyncHandeler(async (req, res) => {
     // =======password encrypeted=========
 
     // now make a  password encrypt
-    const hashPassword = await bcryptPassword(Password);
+    const hashPassword = await bcryptPassword(password);
 
     // save data in database
     const Users = await new userModel({
-      FirstName,
-      LastNane,
-      EmailAddress,
-      TelePhone,
-      Address1,
-      Address2,
-      City,
-      PostCode,
-      Devision,
-      District,
-      Password: hashPassword,
+      firstName,
+      lastName,
+      emailAddress,
+      telePhone,
+      address1,
+      address2,
+      city,
+      postCode,
+      devision,
+      district,
+      password: hashPassword,
     }).save();
 
     // ===make otp====
     const otp = await MakeOtp();
     console.log(otp);
     // ======dending email=====
-    const mailInfo = await sendMail(EmailAddress, FirstName, otp);
+    const mailInfo = await sendMail(emailAddress, firstName, otp);
     console.log(mailInfo);
 
     if (Users || mailInfo) {
@@ -141,7 +142,7 @@ const CreateUser = asyncHandeler(async (req, res) => {
       );
 
       const recentCreateUser = await userModel
-        .find({ $or: [{ TelePhone }, { EmailAddress }] })
+        .find({ $or: [{ telePhone }, { emailAddress }] })
         .select("-Password");
 
       return res
@@ -173,16 +174,16 @@ const CreateUser = asyncHandeler(async (req, res) => {
 // ================login Controler==========
 const loginCrontroller = async (req, res) => {
   try {
-    const { EmailAddress, Password } = req.body;
+    const { emailAddress, password } = req.body;
     // ==========validation=====
-    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+    if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
         .status(404)
         .json(
           new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
         );
     }
-    if (!Password || !passwordChecker(Password)) {
+    if (!password || !passwordChecker(password)) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `Password missing!!`));
@@ -191,11 +192,11 @@ const loginCrontroller = async (req, res) => {
     const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
     // =========password valigation======
     const userPasswordIsValid = await decodeHashPassword(
-      Password,
-      findUser?.Password
+      password,
+      findUser?.password
     );
     // =======create a accessToken=====
-    const accessToken = await generateAccesToken(EmailAddress);
+    const accessToken = await generateAccesToken(emailAddress);
     // ======check credential=======
     if (findUser && userPasswordIsValid) {
       // now set the token on database

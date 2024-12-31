@@ -3,75 +3,75 @@ const { Schema } = mongoose;
 
 const UserSchema = new Schema(
   {
-    FirstName: {
+    firstName: {
       type: String,
       required: [true, "frist mane missing"],
       trim: true,
       max: [15, "Max Name Size 25 Character "],
       min: [3, "Min Value 3 character"],
     },
-    LastNane: {
+    lastName: {
       type: String,
       trim: true,
       min: [3, "Min Value 3 character"],
       max: [15, "Max Name Size 25 Character "],
     },
-    EmailAddress: {
+    emailAddress: {
       type: String,
       required: [true, "emailAddress is missing"],
       trim: true,
       unique: true,
     },
-    TelePhone: {
+    telePhone: {
       type: String,
       required: [true, "telephone is missing"],
       trim: true,
       unique: true,
     },
-    Address1: {
+    address1: {
       type: String,
-      required: [true, "address1 is missing"],
+      // required: [true, "address1 is missing"],
       trim: true,
     },
-    Address2: {
-      type: String,
-      trim: true,
-    },
-    City: {
+    address2: {
       type: String,
       trim: true,
     },
-    PostCode: {
+    city: {
+      type: String,
+      trim: true,
+    },
+    postCode: {
       type: String,
       trim: true,
       max: 4,
     },
-    Devision: {
+    devision: {
       type: String,
       trim: true,
     },
-    District: {
+    district: {
       type: String,
       trim: true,
     },
-    Password: {
+    password: {
       type: String,
       required: [true, "Passsword is missing"],
       trim: true,
     },
-    OTP: {
+    otp: {
       type: String,
     },
-    userIsVeryFied:{
-      type : Boolean,
-      default: false
+    userIsVeryFied: {
+      type: Boolean,
+      default: false,
     },
-    Role: {
+    role: {
       type: String,
       enum: ["admin", "user", "marchent"],
       default: "user",
     },
-    Token: {
+    token: {
       type: String,
     },
     avatar: {
@@ -80,7 +80,6 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
-
 
 const userModel = mongoose.model("user", UserSchema);
 module.exports = { userModel };

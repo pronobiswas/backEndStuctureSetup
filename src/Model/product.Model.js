@@ -32,7 +32,7 @@ const productSchema = new Schema(
     },
     rating: {
       type: Number,
-      default: 0,
+      default: 3.5,
     },
     review: [
       {
@@ -49,11 +49,17 @@ const productSchema = new Schema(
       ref: "store",
       required: true,
     },
+    isAproved: {
+      type: String,
+      enum: ['pending', 'approved', 'reject'],
+      default: "pending",
+    },
     image: [
       {
         type: String,
       },
     ],
+    
   },
   {
     timestamps: true,

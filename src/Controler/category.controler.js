@@ -91,10 +91,19 @@ const getSingleCategoryControler = async (req, res) => {
     const { id } = req.params;
     console.log(id);
     // ====find the single category========
-    const singleCategory = await categoryModel.findById({ _id: id });
+    const singleCategory = await categoryModel.findById({ _id: id }).populate({path:"product"});
     // ====just return if not found=====
     if (!singleCategory) {
-      return null;
+      return res.status(404)
+      .json(
+        new ApiError(
+          false,
+          null,
+          404,
+          "Nothing to Display"
+        )
+      )
+      ;
     }
     // ==========sent response=====
     return res

@@ -7,6 +7,7 @@ const subCategoryRoutes = require('./api/subCategory.apiRoute.js');
 const marchantRoute = require('./api/marChantApiRoute.js')
 const productRoute = require('./api/product.ApiRoute.js')
 const bannerRoute = require('./api/bannerImage.Api.js')
+const flashSaleRoute = require('./api/flashSale.Api.js')
 const bestSellingProductRoute = require('./api/bestSellingApi.Route.js')
 const {ApiError} = require('../Utils/ApiError.js')
 
@@ -18,6 +19,7 @@ _.use(marchantRoute);
 _.use(productRoute);
 _.use(bannerRoute);
 _.use(bestSellingProductRoute);
+_.use(flashSaleRoute);
 
 
 _.use((req,res)=> {
