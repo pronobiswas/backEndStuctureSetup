@@ -11,15 +11,11 @@ const {
 const { sendMail } = require("../Utils/SendMail.js");
 const { MakeOtp } = require("../Helper/OtpGenaretor.js");
 
-/**
- * @param{{req.body}} req
- * @param {{}} res
- **/
 const options = {
   httpOnly: true,
   secure: true,
 };
-// =======creaye user=========
+// =======create user=========
 const CreateUser = asyncHandeler(async (req, res) => {
   try {
     const {
@@ -117,45 +113,46 @@ const CreateUser = asyncHandeler(async (req, res) => {
       lastName,
       emailAddress,
       telePhone,
-      address1,
-      address2,
-      city,
-      postCode,
-      devision,
-      district,
+      // address1,
+      // address2,
+      // city,
+      // postCode,
+      // devision,
+      // district,
       password: hashPassword,
     }).save();
 
     // ===make otp====
     const otp = await MakeOtp();
-    console.log(otp);
     // ======dending email=====
     const mailInfo = await sendMail(emailAddress, firstName, otp);
     console.log(mailInfo);
 
+    // now set the OTP on database
     if (Users || mailInfo) {
-      // now set the OTP on database
       const setOTP = await userModel.findOneAndUpdate(
         { _id: Users._id },
-        { $set: { OTP: otp } },
+        { $set: { otp: otp } },
         { new: true }
       );
+      // ========return the tthe success response=======
+      if (setOTP) {
+        const recentCreateUser = await userModel
+          .find({ $or: [{ telePhone }, { emailAddress }] })
+          .select("-Password");
 
-      const recentCreateUser = await userModel
-        .find({ $or: [{ telePhone }, { emailAddress }] })
-        .select("-Password");
-
-      return res
-        .status(200)
-        .json(
-          new ApiResponse(
-            true,
-            recentCreateUser,
-            200,
-            null,
-            "Registration  sucesfull"
-          )
-        );
+        return res
+          .status(200)
+          .json(
+            new ApiResponse(
+              true,
+              recentCreateUser,
+              200,
+              null,
+              "Registration  sucesfull"
+            )
+          );
+      }
     }
   } catch (error) {
     return res
@@ -174,7 +171,10 @@ const CreateUser = asyncHandeler(async (req, res) => {
 // ================login Controler==========
 const loginCrontroller = async (req, res) => {
   try {
+    console.log("horibol");
+
     const { emailAddress, password } = req.body;
+
     // ==========validation=====
     if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
@@ -189,12 +189,30 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    const findUser = await userModel.findOne({ emailAddress: emailAddress });
+    console.log(findUser.userIsVeryFied);
+    if (!findUser) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `Creadiantial not found!!`));
+    }
+    // =====check userIs veryFied======
+    if (!findUser.userIsVeryFied) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `Veryfi your mail..!!`));
+    }
+
     // =========password valigation======
     const userPasswordIsValid = await decodeHashPassword(
       password,
       findUser?.password
     );
+    if (!userPasswordIsValid) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 404, `Creadiantial Error!!`));
+    }
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(emailAddress);
     // ======check credential=======
@@ -238,10 +256,13 @@ const loginCrontroller = async (req, res) => {
 // =====otp match Controler========
 const otpMatchControler = async (req, res) => {
   console.log("otp controler active");
+
   try {
-    const { EmailAddress, OTP } = req.body;
+    const { emailAddress, otp } = req.body;
+    console.log(otp);
+
     // ===email vaidation=======
-    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+    if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
         .status(404)
         .json(
@@ -249,20 +270,22 @@ const otpMatchControler = async (req, res) => {
         );
     }
     // ==========OTP vaidation=========
-    if (!OTP) {
+    if (!otp) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `OTP missing or in valid!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    const findUser = await userModel.findOne({ emailAddress: emailAddress });
     if (!findUser) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `User doesnot Exist`));
     }
-    if (findUser.OTP == OTP) {
-      findUser.OTP = null;
+
+    if (findUser.otp == otp) {
+      findUser.userIsVeryFied = "true";
+      findUser.otp = null;
       await findUser.save();
       return res
         .status(200)

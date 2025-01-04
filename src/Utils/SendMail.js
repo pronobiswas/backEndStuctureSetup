@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const { MakeTemplate } = require("../Helper/emailTamplate");
-const sendMail = async (EmailAddress,FirstName,otp) => {
+const sendMail = async (emailAddress, firstName, otp) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -11,14 +11,14 @@ const sendMail = async (EmailAddress,FirstName,otp) => {
       },
     });
     const info = await transporter.sendMail({
-      from: process.env.HOST_MAIL, 
-      to: `${EmailAddress}`, 
-      subject: "Hello ✔", 
-      html: MakeTemplate(FirstName,otp),
+      from: process.env.HOST_MAIL,
+      to: `${emailAddress}`,
+      subject: "Hello ✔",
+      html: MakeTemplate(firstName, otp),
     });
-    return info
+    return info;
   } catch (error) {
     console.log(`From sent mail function : ${error}`);
   }
 };
-module.exports = {sendMail}
+module.exports = { sendMail };

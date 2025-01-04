@@ -5,9 +5,9 @@ const EamilChecker = (email) => {
   return testResult;
 };
 
-const passwordChecker = (password = "Mern@2305") => {
+const passwordChecker = (password = "Mern@2306") => {
   const passwordRegex =
-    /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
   const testResult = passwordRegex.test(password);
   return testResult;
 };
