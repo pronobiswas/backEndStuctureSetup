@@ -190,7 +190,6 @@ const loginCrontroller = async (req, res) => {
     }
     // =====find and match user creadential============
     const findUser = await userModel.findOne({ emailAddress: emailAddress });
-    console.log(findUser.userIsVeryFied);
     if (!findUser) {
       return res
         .status(404)
@@ -215,6 +214,7 @@ const loginCrontroller = async (req, res) => {
     }
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(emailAddress);
+    
     // ======check credential=======
     if (findUser && userPasswordIsValid) {
       // now set the token on database
@@ -223,6 +223,7 @@ const loginCrontroller = async (req, res) => {
         { $set: { Token: accessToken } },
         { new: true }
       );
+      
     } else {
       return res
         .status(404)
@@ -348,7 +349,7 @@ const forgotPasswordControler = async (req, res) => {
       .json(
         new ApiResponse(
           true,
-          null,
+          findUser,
           200,
           null,
           "Forgot sucesfull && check your email"
