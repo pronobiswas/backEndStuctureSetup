@@ -314,9 +314,11 @@ const otpMatchControler = async (req, res) => {
 const forgotPasswordControler = async (req, res) => {
   console.log("from forgot password");
   try {
-    const { EmailAddress } = req.body;
+    const { emailAddress } = req.body;
+    console.log(emailAddress);
+
     // ===email vaidation=======
-    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+    if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
         .status(404)
         .json(
@@ -324,14 +326,21 @@ const forgotPasswordControler = async (req, res) => {
         );
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
+    const findUser = await userModel.findOne({ emailAddress: emailAddress });
+
+    if (!findUser) {
+      return res
+        .status(404)
+        .json(new ApiError(false, null, 400, `user not found !!`));
+    }
+
     // ===make otp====
     const otp = await MakeOtp();
     // =======sent mail========
-    await sendMail(EmailAddress, findUser.FirstName, otp);
+    await sendMail(emailAddress, findUser?.firstName, otp);
     // ======set and save otp====
-    findUser.OTP = otp;
-    await findUser.save;
+    findUser.otp = otp;
+    await findUser.save();
     // ======send response=======
     console.log(findUser);
     return res
@@ -353,7 +362,7 @@ const forgotPasswordControler = async (req, res) => {
           false,
           null,
           400,
-          `otpMatchControler Controller Error:  ${error} !!`
+          `forgot password Controller Error:  ${error} !!`
         )
       );
   }
