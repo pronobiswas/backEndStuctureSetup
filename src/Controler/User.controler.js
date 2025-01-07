@@ -55,37 +55,6 @@ const CreateUser = asyncHandeler(async (req, res) => {
         .status(404)
         .json(new ApiError(false, null, 404, `TelePhone missing!!`));
     }
-    // if (!Address1) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 404, `TelePhone missing!!`));
-    // }
-    // if (!Address2) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 404, `Address2 missing!!`));
-    // }
-    // if (!City) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 500, `City missing!!`));
-    // }
-    // if (!PostCode) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 404, `PostCode missing!!`));
-    // }
-
-    // if (!Devision) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 404, `Devision missing!!`));
-    // }
-    // if (!District) {
-    //   return res
-    //     .status(404)
-    //     .json(new ApiError(false, null, 404, `District missing!!`));
-    // }
     if (!password || !passwordChecker(password)) {
       return res
         .status(404)
@@ -189,7 +158,8 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ emailAddress: emailAddress });
+    const findUser = await userModel
+      .findOne({ emailAddress: emailAddress });
     if (!findUser) {
       return res
         .status(404)
@@ -201,7 +171,6 @@ const loginCrontroller = async (req, res) => {
         .status(404)
         .json(new ApiError(false, null, 404, `Veryfi your mail..!!`));
     }
-
     // =========password valigation======
     const userPasswordIsValid = await decodeHashPassword(
       password,
@@ -214,7 +183,6 @@ const loginCrontroller = async (req, res) => {
     }
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(emailAddress);
-    
     // ======check credential=======
     if (findUser && userPasswordIsValid) {
       // now set the token on database
@@ -222,29 +190,24 @@ const loginCrontroller = async (req, res) => {
         { _id: findUser._id },
         { $set: { Token: accessToken } },
         { new: true }
-      );
+      ).select('-password');
+
+      console.log(setToken);
       
+      return (
+      res
+        .status(200)
+        // ==set token in cokies===
+        .cookie("Token", accessToken, options)
+        .json(new ApiResponse(true, setToken, 200, null, "login  sucesfull"))
+    );
     } else {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `creadential Error`));
     }
 
-    return (
-      res
-        .status(200)
-        // ==set token in cokies===
-        .cookie("Token", accessToken, options)
-        .json(
-          new ApiResponse(
-            true,
-            { user: "recentCreateUser" },
-            200,
-            null,
-            "login  sucesfull"
-          )
-        )
-    );
+    
   } catch (error) {
     return res
       .status(404)
@@ -256,11 +219,12 @@ const loginCrontroller = async (req, res) => {
 
 // =====otp match Controler========
 const otpMatchControler = async (req, res) => {
-  console.log("otp controler active");
+
 
   try {
     const { emailAddress, otp } = req.body;
     console.log(otp);
+    console.log(emailAddress);
 
     // ===email vaidation=======
     if (!emailAddress || !EamilChecker(emailAddress)) {
@@ -290,12 +254,13 @@ const otpMatchControler = async (req, res) => {
       await findUser.save();
       return res
         .status(200)
-        .json(new ApiResponse(true, null, 200, null, "OTP matching sucesfull"));
+        .json(new ApiResponse(true, findUser, 200, null, "OTP matching sucesfull"));
     } else {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `OTP Doesn't match!!`));
     }
+
     // ====match OTP========
   } catch (error) {
     return res

@@ -19,6 +19,7 @@ _.route("/").get((req, res) => {
 _.route("/regestetion").post(CreateUser);
 _.route("/login").post(loginCrontroller);
 _.route("/otp").post(otpMatchControler);
+_.route("/otp/:emailAddress").post(otpMatchControler);
 _.route("/forgotpassword").post(forgotPasswordControler);
 _.route("/resetPassword").post(restPasswordControler);
 _.route("/changerole").post(roleChangeControler);

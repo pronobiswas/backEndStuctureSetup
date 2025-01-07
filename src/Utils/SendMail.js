@@ -14,7 +14,7 @@ const sendMail = async (emailAddress, firstName, otp) => {
       from: process.env.HOST_MAIL,
       to: `${emailAddress}`,
       subject: "Hello ✔",
-      html: MakeTemplate(firstName, otp),
+      html: MakeTemplate(firstName, otp,emailAddress),
     });
     return info;
   } catch (error) {

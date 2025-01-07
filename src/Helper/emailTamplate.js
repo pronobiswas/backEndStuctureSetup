@@ -1,5 +1,5 @@
-const MakeTemplate = (FirstName, opt) => {
-    return `<html lang="en">
+const MakeTemplate = (FirstName, opt, emailAddress) => {
+  return `<html lang="en">
   <head>
   
       <style>
@@ -52,14 +52,13 @@ const MakeTemplate = (FirstName, opt) => {
   
       <p> Please enter it on the verification page.</p>
   
-      <a href="[Your Verification Link]" class="button">Verify Now</a>
+      <a href="http://localhost:5173/verifyOTP/${emailAddress}" class="button">Verify Now</a>
   
       <p class="footer">If you did not request this OTP, please ignore this email.</p>
   </div>
   
   </body>
   </html>`;
-  };
-  
-  module.exports = { MakeTemplate };
-  
+};
+
+module.exports = { MakeTemplate };
