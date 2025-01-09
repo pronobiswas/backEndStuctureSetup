@@ -158,8 +158,7 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel
-      .findOne({ emailAddress: emailAddress });
+    const findUser = await userModel.findOne({ emailAddress: emailAddress });
     if (!findUser) {
       return res
         .status(404)
@@ -186,28 +185,28 @@ const loginCrontroller = async (req, res) => {
     // ======check credential=======
     if (findUser && userPasswordIsValid) {
       // now set the token on database
-      const setToken = await userModel.findOneAndUpdate(
-        { _id: findUser._id },
-        { $set: { Token: accessToken } },
-        { new: true }
-      ).select('-password');
+      const setToken = await userModel
+        .findOneAndUpdate(
+          { _id: findUser._id },
+          { $set: { Token: accessToken } },
+          { new: true }
+        )
+        .select("-password");
 
       console.log(setToken);
-      
+
       return (
-      res
-        .status(200)
-        // ==set token in cokies===
-        .cookie("Token", accessToken, options)
-        .json(new ApiResponse(true, setToken, 200, null, "login  sucesfull"))
-    );
+        res
+          .status(200)
+          // ==set token in cokies===
+          .cookie("Token", accessToken, options)
+          .json(new ApiResponse(true, setToken, 200, null, "login  sucesfull"))
+      );
     } else {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `creadential Error`));
     }
-
-    
   } catch (error) {
     return res
       .status(404)
@@ -219,12 +218,9 @@ const loginCrontroller = async (req, res) => {
 
 // =====otp match Controler========
 const otpMatchControler = async (req, res) => {
-
-
   try {
     const { emailAddress, otp } = req.body;
-    console.log(otp);
-    console.log(emailAddress);
+
 
     // ===email vaidation=======
     if (!emailAddress || !EamilChecker(emailAddress)) {
@@ -254,7 +250,9 @@ const otpMatchControler = async (req, res) => {
       await findUser.save();
       return res
         .status(200)
-        .json(new ApiResponse(true, findUser, 200, null, "OTP matching sucesfull"));
+        .json(
+          new ApiResponse(true, findUser, 200, null, "OTP matching sucesfull")
+        );
     } else {
       return res
         .status(404)
