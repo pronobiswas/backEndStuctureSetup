@@ -336,33 +336,33 @@ const forgotPasswordControler = async (req, res) => {
 const restPasswordControler = async (req, res) => {
   console.log("from rest password controler");
   try {
-    const { EmailAddress, Password, OTP } = req.body;
+    const { emailAddress, password } = req.body;
     // =====email and password validation========
-    if (!EmailAddress || !EamilChecker(EmailAddress)) {
+    if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
         .status(404)
         .json(
           new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
         );
     }
-    if (!Password || !passwordChecker(Password) || !OTP) {
+    if (!password || !passwordChecker(password) || !OTP) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `Password missing!!`));
     }
     // =====find and match user creadential============
-    const findUser = await userModel.findOne({ EmailAddress: EmailAddress });
-    console.log(findUser);
+    const findUser = await userModel.findOne({ emailAddress: emailAddress });
 
     if (!findUser) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `user not exist!!`));
     }
-    if (findUser.OTP == OTP) {
+
+    if (findUser) {
       // =======password encrypeted=========
-      const hashPassword = await bcryptPassword(Password);
-      findUser.Password = hashPassword;
+      const hashPassword = await bcryptPassword(password);
+      findUser.password = hashPassword;
       await findUser.save();
       // ======sent response=======
       return res
@@ -370,7 +370,7 @@ const restPasswordControler = async (req, res) => {
         .json(
           new ApiResponse(
             true,
-            null,
+            findUser,
             200,
             null,
             "Forgot sucesfull && check your email"
