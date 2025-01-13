@@ -21,7 +21,7 @@ _.route("/login").post(loginCrontroller);
 _.route("/otp").post(otpMatchControler);
 _.route("/otp/:emailAddress").post(otpMatchControler);
 _.route("/forgotpassword").post(forgotPasswordControler);
-_.route("/resetPassword").post(restPasswordControler);
+_.route("/resetPassword/:emailAddress").post(restPasswordControler);
 _.route("/changerole").post(roleChangeControler);
 _.route("/allUsers").get(getAllRegisterUser);
 

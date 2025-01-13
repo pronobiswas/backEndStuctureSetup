@@ -337,6 +337,7 @@ const restPasswordControler = async (req, res) => {
   console.log("from rest password controler");
   try {
     const { emailAddress, password } = req.body;
+    
     // =====email and password validation========
     if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
@@ -345,7 +346,7 @@ const restPasswordControler = async (req, res) => {
           new ApiError(false, null, 404, `EmailAddress missing or in valid!!`)
         );
     }
-    if (!password || !passwordChecker(password) || !OTP) {
+    if (!password || !passwordChecker(password)) {
       return res
         .status(404)
         .json(new ApiError(false, null, 404, `Password missing!!`));
@@ -361,6 +362,8 @@ const restPasswordControler = async (req, res) => {
 
     if (findUser) {
       // =======password encrypeted=========
+      console.log(findUser);
+      
       const hashPassword = await bcryptPassword(password);
       findUser.password = hashPassword;
       await findUser.save();
