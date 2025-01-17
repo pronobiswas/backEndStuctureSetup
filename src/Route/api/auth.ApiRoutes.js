@@ -9,13 +9,9 @@ const {
   restPasswordControler,
   roleChangeControler,
 } = require("../../Controler/User.controler.js");
-const { authGuard } = require("../../middlewere/authguard.js");
+// const { authGuard } = require("../../middlewere/authguard.js");
 const _ = Router();
 
-_.route("/").get((req, res) => {
-  res.send("hello");
-  authGuard();
-});
 _.route("/regestetion").post(CreateUser);
 _.route("/login").post(loginCrontroller);
 _.route("/otp").post(otpMatchControler);

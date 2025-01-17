@@ -21,7 +21,7 @@ const generateAccesToken = async (EmailAddress) => {
     {
       EmailAddress,
     },
-    `8bCz-4buc`,
+    process.env.ACESS_TOKEN_SCERECT || `8bCz-4buc`,
     { expiresIn: "1d" }
   );
 

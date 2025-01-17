@@ -13,7 +13,7 @@ const { MakeOtp } = require("../Helper/OtpGenaretor.js");
 
 const options = {
   httpOnly: true,
-  secure: true,
+  secure: false,
 };
 // =======create user=========
 const CreateUser = asyncHandeler(async (req, res) => {
@@ -136,12 +136,9 @@ const CreateUser = asyncHandeler(async (req, res) => {
       );
   }
 });
-
 // ================login Controler==========
 const loginCrontroller = async (req, res) => {
   try {
-    console.log("horibol");
-
     const { emailAddress, password } = req.body;
 
     // ==========validation=====
@@ -182,24 +179,27 @@ const loginCrontroller = async (req, res) => {
     }
     // =======create a accessToken=====
     const accessToken = await generateAccesToken(emailAddress);
+
     // ======check credential=======
     if (findUser && userPasswordIsValid) {
       // now set the token on database
       const setToken = await userModel
         .findOneAndUpdate(
           { _id: findUser._id },
-          { $set: { Token: accessToken } },
+          { $set: { token: accessToken } },
           { new: true }
         )
         .select("-password");
-
-      console.log(setToken);
 
       return (
         res
           .status(200)
           // ==set token in cokies===
-          .cookie("Token", accessToken, options)
+          .cookie("Token", accessToken, {
+            httpOnly: true,
+            secure: false, // Ensure HTTPS is used
+            sameSite: "None", // Allow cross-origin cookies
+          })
           .json(new ApiResponse(true, setToken, 200, null, "login  sucesfull"))
       );
     } else {
@@ -220,7 +220,9 @@ const loginCrontroller = async (req, res) => {
 const otpMatchControler = async (req, res) => {
   try {
     const { emailAddress, otp } = req.body;
+    console.log(emailAddress);
 
+    // return;
 
     // ===email vaidation=======
     if (!emailAddress || !EamilChecker(emailAddress)) {
@@ -337,7 +339,7 @@ const restPasswordControler = async (req, res) => {
   console.log("from rest password controler");
   try {
     const { emailAddress, password } = req.body;
-    
+
     // =====email and password validation========
     if (!emailAddress || !EamilChecker(emailAddress)) {
       return res
@@ -363,7 +365,7 @@ const restPasswordControler = async (req, res) => {
     if (findUser) {
       // =======password encrypeted=========
       console.log(findUser);
-      
+
       const hashPassword = await bcryptPassword(password);
       findUser.password = hashPassword;
       await findUser.save();
