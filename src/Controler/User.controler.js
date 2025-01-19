@@ -178,7 +178,7 @@ const loginCrontroller = async (req, res) => {
         .json(new ApiError(false, null, 404, `Creadiantial Error!!`));
     }
     // =======create a accessToken=====
-    const accessToken = await generateAccesToken(emailAddress);
+    const accessToken = await generateAccesToken(emailAddress ,findUser._id);
 
     // ======check credential=======
     if (findUser && userPasswordIsValid) {

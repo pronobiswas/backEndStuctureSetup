@@ -15,11 +15,12 @@ const decodeHashPassword = async (plainPassword, encryptedPassword) => {
   const passwordResult = await bcrypt.compare(plainPassword, encryptedPassword);
   return passwordResult;
 };
-// ========OTP generator====
-const generateAccesToken = async (EmailAddress) => {
+// ========token generator====
+const generateAccesToken = async (EmailAddress , id) => {
   const AccessToken = await jwt.sign(
     {
       EmailAddress,
+      id
     },
     process.env.ACESS_TOKEN_SCERECT || `8bCz-4buc`,
     { expiresIn: "1d" }
