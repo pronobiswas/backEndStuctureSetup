@@ -9,6 +9,7 @@ const marchantRoute = require("./api/marChantApiRoute.js");
 const productRoute = require("./api/product.ApiRoute.js");
 const bannerRoute = require("./api/bannerImage.Api.js");
 const flashSaleRoute = require("./api/flashSale.Api.js");
+const orderApiRoute = require("./api/order.ApiRoutes.js");
 const bestSellingProductRoute = require("./api/bestSellingApi.Route.js");
 const { ApiError } = require("../Utils/ApiError.js");
 
@@ -22,6 +23,7 @@ _.use(bestSellingProductRoute);
 _.use(flashSaleRoute);
 _.use(flashSaleRoute);
 _.use(cartApiRoutes);
+_.use(orderApiRoute);
 
 _.use((req, res) => {
   res.status(400).json(new ApiError(false, null, 404, "Api Routes InValid !!"));

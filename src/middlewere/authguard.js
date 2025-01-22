@@ -7,7 +7,7 @@ const authGuard = async (req, res, next) => {
     const { cookie, authorization } = req.headers;
     const cookiesToken = cookie?.split("=")[1];
 
-    if (authorization) {
+    if (authorization ) {
       // ====verify token===
       const decoded = jwt.verify(
         authorization.trim(),
