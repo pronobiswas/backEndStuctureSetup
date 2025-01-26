@@ -22,12 +22,12 @@ const orderSchema = new Schema(
           type: String,
           trim: true,
         },
-        email: {
+        emailAddress: {
           type: String,
           trim: true,
         },
-        phone: {
-          type: Number,
+        telePhone: {
+          type: String,
           required: true,
         },
         address1: {
@@ -50,7 +50,7 @@ const orderSchema = new Schema(
           required: true,
           default: "Dhaka",
         },
-        postcode: {
+        postCode: {
           type: Number,
         },
       },
@@ -79,7 +79,6 @@ const orderSchema = new Schema(
         type: Number,
       },
     },
-  
     {
       timestamps: true,
     }
